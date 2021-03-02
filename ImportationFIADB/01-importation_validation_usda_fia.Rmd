@@ -1,0 +1,583 @@
+---
+title: "01-validation_usda_fia"
+output: html_notebook
+---
+
+# Script d'importation et de validation des données du FIADB 
+
+__Auteur__: Jean-Michel St-Pierre
+__Objectif__: Ce script vise à faire l'installation de la base de données, l'importation des données dans les tables et la validation du succès de l'importation dans un environnement physique où la base de données n'est pas installée.
+
+## 1. Initialisation
+
+```{r Initialisation, message=FALSE, warning=FALSE}
+
+# nettoyage et appel de gc()
+rm(list = ls())
+invisible(gc())
+
+# chargement des fonctions
+source("./fonctions.R")
+
+```
+
+
+```{r Chargement des packages}
+# chargement des packages 
+listePackages <-
+  c("DBI",
+    "dbplyr",
+    "odbc",
+    "RPostgreSQL",
+    "tidyverse",
+    "stringi",
+    "dbplot",
+    "devtools",
+    "compare",
+    "data.table",
+    "R.utils", 
+    "parsedate",
+    "pryr",
+    "lubridate",
+    "sf",
+    "RQGIS",
+    "testthat",
+    "rmarkdown",
+    "shiny",
+    "getPass")
+packagesAInstaller <-
+  listePackages[!(listePackages %in% installed.packages()[, "Package"])]
+if (length(packagesAInstaller) > 0)
+  install.packages(packagesAInstaller)
+
+require("DBI")
+require("dbplyr")
+require("odbc")
+require("RPostgreSQL")
+require("tidyverse")
+require("dbplot")
+require("devtools")
+require("compare")
+require("data.table")
+require("R.utils")
+require("parsedate")
+require("pryr")
+require("lubridate")
+require("sf")
+require("RQGIS")
+require("testthat")
+require("rmarkdown")
+require("shiny")
+require("getPass")
+require("stringi")
+```
+
+## 2. Variables d'utilisateur 
+
+```{r Variables dutilisateur}
+
+# Chemin complet de l'emplacement desire pour le tablespace
+emplacementTablespace <- "D:/testdb"
+
+# Nom du repertoire de scripts (version du fiadb)
+# Lors de la création de ce script le répertoire s'appelait :
+# FIADB_PG_1_7_2_00 (version 1.7.2.00)
+repFIADB <- "FIADB_PG_1_8_0_00"
+
+# nom assigne a la base de donnees apres validation
+nouvNomBD <- "db_drf_usda"
+
+# nom assigne au schema apres validation
+nouvNomSchema <- "drf_142332119_usda_fia"
+
+# chamin dacces au repertoire des executables de postgres (utiliser la syntaxe avec les "\\")
+repPG <- "C:\\Program Files\\PostgreSQL\\10\\bin"
+
+versionPG <- str_extract(repPG, "\\d+\\.*\\d*")
+
+```
+
+## 3. Connexion avec la base de données postgres
+
+```{r connexion avec la base de donnes postgres}
+
+# déconnexion
+
+killDbConnections()
+
+# chargement du driver PostgreSQL
+drv <- dbDriver("PostgreSQL")
+
+# creation de la BD
+
+connect <-
+  dbConnect(
+    drv,
+    dbname = "postgres",
+    host = "localhost",
+    port = 5432,
+    user = "postgres",
+    password = getPass("Enter Password:")
+  )
+
+
+# création du Tablespace
+if(dir.exists(emplacementTablespace)==F){
+  dir.create(gsub("/", "\\\\", emplacementTablespace))
+}
+
+if(toString(dbGetQuery(connect, "SELECT spcname FROM pg_tablespace WHERE spcname = 'tbs_testdb';")) != "tbs_testdb"){
+  test_that("Creation du tablespace", {
+    expect_equal(dbGetQuery(connect, sprintf("CREATE TABLESPACE \"tbs_testdb\" OWNER postgres LOCATION '%s';", gsub("/","\\\\", emplacementTablespace))), data.frame())
+    expect_equal(dbGetQuery(connect, "ALTER TABLESPACE \"tbs_testdb\" OWNER TO postgres;"), data.frame())
+  })
+}
+
+# creation de la base de données
+test_that("déconnexion des utilisateurs", {
+  expect_equal(dbGetQuery(connect, "UPDATE pg_database SET datallowconn = 'false' WHERE datname = 'testdb';"), data.frame())
+  expect_equal(dbGetQuery(connect, "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'testdb';"), data.frame())
+})
+
+test_that("Creation de la base de donnees", {
+  expect_equal(dbGetQuery(connect, "DROP DATABASE IF EXISTS testdb;"), data.frame())
+  expect_equal(dbGetQuery(connect, "CREATE DATABASE testdb TABLESPACE tbs_testdb;"), data.frame())
+})
+
+# connection à la BD testdb
+# la variable "connect" sera réutilisée pour chaque connection
+
+connect <-
+  dbConnect(
+    drv,
+    dbname = "testdb",
+    host = "localhost",
+    port = 5432,
+    user = "postgres",
+    password = getPass("Enter Password:")
+  )
+
+# création des extensions
+test_that("Creation des extensions", {
+  expect_equal(dbGetQuery(connect, "CREATE EXTENSION postgis"), data.frame())
+  expect_equal(dbGetQuery(connect, "CREATE EXTENSION postgis_topology"), data.frame())
+
+})
+
+
+BDExiste <- dbGetQuery(connect, "SELECT 1 from pg_database WHERE datname='testdb'")
+
+if (BDExiste == 1) {
+  cat("\nLa base de donnée 'testdb' a été créée avec succès!")
+  } else{
+    cat("\nLa base de donnée 'testdb' n'existe pas")
+}
+```
+
+## 4. Importation des donnees
+
+```{r importation des donnees}
+
+# Exéccution du script d'installation
+source("./02-installation_bd.R")
+
+```
+
+
+## 5. Statut de l'importation
+
+```{r Statut de limportation, out.height= 200}
+
+# CREATION DES TABLES
+# 
+# 1) Noms des tables dans les scripts sql createTable : listeFichiersSQL
+#    Nombre de fichiers sql createTable: nbFichiersSQL
+# 
+
+nomFichiersSQL <- c()
+for (i in 1:length(listeFichiersSQL)) {
+  nomFichiersSQL[i] <- str_split(listeFichiersSQL[i], pattern = "/")[[1]] %>% tail(., n = 1) %>% gsub("Create|.sql", "", .) %>% tolower(.)
+}
+nbFichiersSQL <- length(listeFichiersSQL)
+
+
+# 2) Noms des tables dans le schéma "fs_fiadb" : listeTablesSchema
+#    Nombre de table dans le schéma: nbTableSchema
+
+listeTablesSchema <- dbGetQuery(connect, "SELECT table_name FROM information_schema.tables
+WHERE table_schema = 'fs_fiadb' ORDER BY table_name ASC;") %>% unlist(.) %>% unname(.)
+# listeTablesSchema <- listeTablesSchema[[1]]
+nbTableSchema <- length(listeTablesSchema)  # nombre de tables dans le schéma
+
+# 3) comparaison entre les deux listes
+
+scriptsInvalides <- grep("\\b0\\b", match(nomFichiersSQL, listeTablesSchema, nomatch = 0))
+nomScriptsInvalides <- nomFichiersSQL[scriptsInvalides]
+
+# CHARGEMENT DE LA DONNEE
+# 
+# 1) Fichiers de de données CSV : listeNomCSV
+#    Nombre de fichiers CSV : nbFichiersCSV
+
+# 2) liste Fichiers vides
+listePosCSVEmpty <- c()
+for (i in 1:nbFichiersCSV) {
+  if (length(read_lines(listeFichiersCSV[i], skip = 1, progress = FALSE)) == 0) {
+    listePosCSVEmpty <- append(listePosCSVEmpty, i)
+  }
+}
+
+listeCSVEmpty <- listeNomCSV[listePosCSVEmpty]
+
+# 3) liste tables vides
+# 
+
+listePosTablesEmpty <- c()
+for (i in 1:nbTableSchema) {
+  if (dbGetQuery(connect, sprintf("SELECT count(*) from fs_fiadb.%s;", listeTablesSchema[i])) == 0) {
+    listePosTablesEmpty <- append(listePosTablesEmpty, i)
+  }
+}
+
+listeTablesEmpty <- listeTablesSchema[listePosTablesEmpty]
+
+# présentation des résultats
+# 
+
+calledScripts <- getScriptsNames("./FIADB_PG_1_8_0_00/BatchScripts/createTables.bat")
+nbCalledScripts <- length(calledScripts)
+
+dataNames <- c("calledScripts", "nomFichiersSQL", "listeNomCSV", "listeTablesSchema")
+posVectorMax <- which.max(c(nbCalledScripts, nbFichiersSQL, nbFichiersCSV, nbTableSchema))
+data <- eval(parse(text = dataNames[posVectorMax]))
+statut <- tibble(NAME = character(length(data)), CREATE_TABLE_CALL = character(length(data)), SQL_FILE = character(length(data)), CSV_FILE = character(length(data)), DB_TABLE = character(length(data)), CSV_EMPTY = character(length(data)), TABLE_EMPTY = character(length(data)))
+colnames(statut) <- c("NAME","CREATE_TABLE_CALL", "SQL_FILE", "CSV_FILE", "DB_TABLE", "CSV_EMPTY", "TABLE_EMPTY")
+posRetFile <- c()
+for (i in 1:length(data)) {
+  a <- data[i]
+  a1 <- if(is_empty(grep(paste0("\\b", data[i], "\\b"), calledScripts, value = TRUE)) == TRUE){"Missing"} else {""}
+  a2 <- if(is_empty(grep(paste0("\\b", data[i], "\\b"), nomFichiersSQL, value = TRUE)) == TRUE){"Missing"} else {""}
+  a3 <- if(is_empty(grep(paste0("\\b", data[i], "\\b"), listeNomCSV, value = TRUE)) == TRUE){"Missing"} else {""}
+  a4 <- if(is_empty(grep(paste0("\\b", data[i], "\\b"), listeTablesSchema, value = TRUE)) == TRUE){"Missing"} else {""}
+  a5 <- if(is_empty(grep(paste0("\\b", data[i], "\\b"), listeCSVEmpty)) == FALSE){"X"} else {""}
+  a6 <- if(is_empty(grep(paste0("\\b", data[i], "\\b"), listeTablesEmpty)) == FALSE){"X"} else {""}
+  
+  statut[i,] <- c(a, a1, a2, a3, a4, a5, a6)
+  if (TRUE %in% grepl("Missing|X", statut[i,])){
+    posRetFile <- append(posRetFile, i)
+  }
+}
+rm(a, a1, a2, a3, a4, a5, a6)
+filesToValidate <- data[-posRetFile]
+
+# Retrait des fichiers CSV vides
+
+if (is.null(listePosCSVEmpty) != TRUE) {
+  listeFichiersCSV <- listeFichiersCSV[-listePosCSVEmpty]
+}
+
+# Retrait des fichiers de tables vides
+
+if (is.null(listePosTablesEmpty) != TRUE) {
+  listeTablesSchema <- listeTablesSchema[-listePosTablesEmpty]
+}
+
+if (length(which(!listeNomCSV %in% filesToValidate)) != 0){
+  listeFichiersCSV <- listeFichiersCSV[-which(!listeNomCSV %in% filesToValidate)]
+}
+
+if (length(which(!listeNomCSV %in% filesToValidate)) != 0){
+  listeNomCSV <- listeNomCSV[-which(!listeNomCSV %in% filesToValidate)]
+}
+
+if (length(which(!listeTablesSchemaData %in% filesToValidate)) != 0){
+  listeTablesSchema <- listeTablesSchema[-which(!listeTablesSchemaData %in% filesToValidate)]
+}
+
+
+# print status
+cat("\nSummary of files/tables status in the current importation: \n\n")
+print.data.frame(statut)
+cat("\n The following files will be matched with the corresponding table to validate the integrity of the importation:\n\n")
+filesToValidate
+
+```
+
+
+## 6. Exportation des tables en CSV
+
+```{r exportation des tables en CSV}
+# Écriture du fichier SQL qui fera la copie du contenu des tables dans des
+# fichiers CSV pour la future comparaison
+
+# Répertoire où sauvegarder les fichier CSV
+cheminRep <- "%cd%\\..\\ExportTables\\"
+sink("exportTables.sql")
+for (j in 1:length(listeTablesSchema)) {
+  cat(
+    paste0(
+      "\\copy fs_fiadb.",
+      listeTablesSchema[j],
+      " TO '",
+      cheminRep,
+      listeTablesSchema[j],
+      ".csv' DELIMITER ',' CSV HEADER;\n"
+    ),
+    file = "exportTables.sql",
+    append = TRUE
+  )
+}
+sink()
+
+# correction de la version postgres
+
+# si la version de l'utilisateur est différente de Postgres 10 le code suivant 
+# modifie le script
+
+if (versionPG != 10){
+  
+  lignesBatchExp <- read_lines("exportTables.bat")
+  lignesModifBatchExp <-
+    gsub(
+      "10",
+      versionPG,
+      lignesBatchExp
+    )
+  cat(lignesModifBatchExp, file = "exportTablesMod.bat", sep = "\n")
+  
+}
+
+# Execution du script batch qui initie l'exportation
+if (versionPG != 10){
+  shell("exportTablesMod.bat", wait = TRUE, intern = TRUE)
+} else{
+  shell("exportTables.bat", wait = TRUE, intern = TRUE)
+}
+
+```
+
+## 7. Comparison between CSV files and data from the tables
+
+```{r importation des dataframes CSV}
+# list of exported tables from the database
+
+listExportTables <-
+  list.files(
+    path = "ExportTables/",
+    pattern = ".csv",
+    ignore.case = TRUE,
+    recursive = TRUE,
+    full.names = TRUE
+  )
+# List of names of the exported tables
+nameExportTables <- sort(gsub("ExportTables/|.csv|.CSV", "", listExportTables))
+
+comp <-
+  tibble(
+    NOM = character(length(filesToValidate)),
+    RESULT = character(length(filesToValidate)),
+    DETAILS = character(length(filesToValidate))
+  )
+# Every file that needs validation will be read using readlines
+# for every file the csv file will be compared to the content of the postgres table
+# length(filesToValidate)
+for (i in 94:length(filesToValidate)) {
+  comp[i, 1] <- filesToValidate[i]
+  if (filesToValidate[i] != "tree") {
+    dataCSV <- fread(
+      listeFichiersCSV[i],
+      colClasses = str2VectorTypes(typesSQL[which(typesSQL$Table == filesToValidate[i]),2]),
+      stringsAsFactors = FALSE,
+      showProgress = FALSE
+    )
+    names(dataCSV) <- dataCSV %>%
+      colnames() %>%
+      tolower() %>%
+      c()
+    dataDB <- fread(
+      listExportTables[i],
+      colClasses = str2VectorTypes(typesSQL[which(typesSQL$Table == filesToValidate[i]),2]),
+      stringsAsFactors = FALSE,
+      showProgress = FALSE
+    )
+    names(dataDB) <- dataDB %>%
+      colnames() %>%
+      tolower() %>%
+      c()
+    if (filesToValidate[i] == "plotsnap") {
+      dataCSV <- dataCSV[order(dataCSV[, 1], dataCSV[, 51]),]
+      dataDB <- dataDB[order(dataDB[, 1], dataDB[, 51]),]
+    } else{
+      dataCSV <- dataCSV[order(dataCSV[, 1]),]
+      dataDB <- dataDB[order(dataDB[, 1]),]
+    }
+    if ("created_date" %in% colnames(dataCSV)) {
+      dataCSV$created_date <- as.Date(as.character(parse_date(dataDB$created_date)))
+    }
+    if ("created_date" %in% colnames(dataDB)) {
+      dataDB$created_date <- as.Date(as.character(parse_date(dataDB$created_date)))
+    }
+    # Substitution de la chaine de caractères de l'heure 0 créée dans postgres
+    # mais absente dans les fichiers originaux
+    if ("modified_date" %in% colnames(dataDB)) {
+      dataDB$modified_date <-  gsub(" 00:00:00", "", dataDB$modified_date)
+    }
+    if ("start_date" %in% colnames(dataCSV)) {
+      dataCSV$start_date <- as.Date(as.character(dataCSV$start_date))
+    }
+    if ("start_date" %in% colnames(dataDB)) {
+      dataDB$start_date <- as.Date(as.character(dataDB$start_date))
+    }
+    if ("end_date" %in% colnames(dataDB)) {
+      dataDB$end_date <-  gsub(" 00:00:00", "", dataDB$end_date)
+    }
+    if ("sample_date" %in% colnames(dataCSV)) {
+      dataCSV$sample_date = as.Date(as.character(dataCSV$sample_date))
+    }
+    if ("sample_date" %in% colnames(dataDB)) {
+      dataDB$sample_date <-  gsub(" 00:00:00", "", dataDB$sample_date)
+      dataDB$sample_date = as.Date(as.character(dataDB$sample_date))
+    }
+    # Conversion dans un type numérique pour des chaines de chiffres
+    # converties automatiquement dans Postgres mais en caractères dans
+    # les fichires CSV originaux
+    if (listeNomCSV[i] == "ref_lichen_spp_comments") {
+      dataCSV$yearstart = as.integer(dataCSV$yearstart)
+      dataDB$yearstart = as.integer(dataCSV$yearstart)
+      dataCSV$yearend = as.integer(dataCSV$yearend)
+      dataDB$yearend = as.integer(dataCSV$yearend)
+      dataCSV$cn = as.character(dataCSV$cn)
+      dataDB$cn = as.character(dataCSV$cn)
+    }
+    if ("updated_unknown_species_date" %in% colnames(dataDB)) {
+      dataDB$updated_unknown_species_date <-
+        gsub(" 00:00:00", "", dataDB$updated_unknown_species_date)
+    }
+    if (listeNomCSV[i] == "plotsnap") {
+      dataCSV$eval_grp_cn <- as.integer(dataCSV$eval_grp_cn)
+      dataDB$eval_grp_cn <- as.integer(dataDB$eval_grp_cn)
+      
+      dataCSV$adj_expall <- as.integer(dataCSV$adj_expall)
+      dataDB$adj_expall <- as.integer(dataDB$adj_expall)
+    }
+    result <- compareEqual(dataCSV, dataDB)
+    comp[i, 2] <- as.character(result[[1]])
+    if (result[[1]] == FALSE) {
+      comp[i, 3][[1]] <- list(as.character(result[[2]]))
+    } else {
+      comp[i, 3] <- ""
+    }
+  } else {
+    
+    # read first large CSV to split
+    dataCSV <- fread(
+      listeFichiersCSV[i],
+      colClasses = str2VectorTypes(typesSQL[which(typesSQL$Table == filesToValidate[i]),2]),
+      stringsAsFactors = FALSE,
+      showProgress = FALSE
+    )
+    dataCSV <- dataCSV[order(dataCSV[, 1]),]
+    nbR <- nrow(dataCSV)
+    n <- nbR / 2
+    dataCSV <-
+      split(dataCSV, rep(1:ceiling(nbR / n), each = n, length.out = nbR))
+    a <- dataCSV[[1]]
+    b <- dataCSV[[2]]
+    save(a,
+         file = paste0(".\\Robjects\\", filesToValidate[i], "_A_csv.RData"))
+    save(b,
+         file = paste0(".\\Robjects\\", filesToValidate[i], "_B_csv.RData"))
+    rm(dataCSV, a, b, nbR, n)
+    invisible(gc())
+    
+    # read second large CSV to split
+    dataDB <- fread(
+      listExportTables[i],
+      colClasses = str2VectorTypes(typesSQL[which(typesSQL$Table == filesToValidate[i]),2]),
+      stringsAsFactors = FALSE,
+      showProgress = FALSE
+    )
+    names(dataDB) <- dataDB %>%
+      colnames() %>%
+      tolower() %>%
+      c()
+    dataDB <- dataDB[order(dataDB[, 1]),]
+    nbR <- nrow(dataDB)
+    n <- nbR / 2
+    dataDB <-
+      split(dataDB, rep(1:ceiling(nbR / n), each = n, length.out = nbR))
+    a <- dataDB[[1]]
+    b <- dataDB[[2]]
+    save(a,
+         file = paste0(".\\Robjects\\",
+                       filesToValidate[i],
+                       "_A_bd.RData"))
+    save(b,
+         file = paste0(".\\Robjects\\",
+                       filesToValidate[i],
+                       "_B_bd.RData"))
+    rm(dataDB, a, b, nbR, n)
+    invisible(gc())
+    
+    # comparison of sub elements
+    letter <- c("A", "B")
+    resultTree <-
+      tibble(result = character(2), details = character(2))
+    for (j in 1:2) {
+      # Chargement des deux Robjects
+      dataCSV <-
+        load(file = paste0(".\\Robjects\\", listeNomCSV[i], "_", letter[j], "_csv.RData" ))
+      dataDB <-
+        load(file = paste0(".\\Robjects\\", listeNomCSV[i], "_",letter[j], "_bd.RData"))
+      if ("created_date" %in% colnames(dataCSV)) {
+        dataCSV$created_date <- as.Date(as.character(dataCSV$created_date))
+      }
+      if ("created_date" %in% colnames(dataDB)) {
+        dataDB$created_date <- as.Date(as.character(dataDB$created_date))
+      }
+      # Substitution de la chaine de caractères de l'heure 0 créée dans postgres
+      # mais absente dans les fichiers originaux
+      if ("modified_date" %in% colnames(dataDB)) {
+        dataDB$modified_date <-  gsub(" 00:00:00", "", dataDB$modified_date)
+      }
+      result <- compareEqual(dataCSV, dataDB)
+      resultTree[j, 1] <- as.character(result[[1]])
+      resultTree[j, 2][[1]] <- list(as.character(result[[2]]))
+      rm(a, b)
+      invisible(gc())
+    }
+    if (unname(unlist(resultTree[, 1])) == c("TRUE", "TRUE")) {
+      comp[i, 2] <- "TRUE"
+      comp[i, 3] <- ""
+    } else {
+      comp[i, 2] <- "FALSE"
+      comp[i, 3][[1]] <-
+        list(c(unlist(resultTree[1, 2][[1]]), unlist(resultTree[2, 2][[1]])))
+    }
+    rm(resultTree)
+  }
+  rm(dataCSV, dataDB, result)
+  invisible(gc())
+}
+
+```
+
+
+## 10. Création du script sql pour renommer le schéma et la BD
+
+```{r creation dus script SQL pour renomme le schema et les tables}
+
+sink("modif_schema.sql")
+cat(
+  paste("ALTER DATABASE testdb RENAME TO ", nouvNomBD, sep = ""),
+  file = "modif_schema.sql",
+  append = TRUE
+)
+cat(
+  paste("\nALTER SCHEMA fs_fiadb RENAME TO ", nouvNomSchema, sep = ""),
+  file = "modif_schema.sql",
+  append = TRUE
+)
+sink()
+
+```

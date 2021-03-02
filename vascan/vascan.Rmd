@@ -1,0 +1,404 @@
+---
+title: "Importation VASCAN"
+output: html_notebook
+editor_options: 
+  chunk_output_type: inline
+---
+## Initialisation
+
+Ce bloc de code fait le nettoyage des variables d'environnement, l'appel à la garbage collection et installe et charge les packages nécessaires au programme.
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+
+# nettoyage et appel de gc()
+rm(list = ls())
+invisible(gc())
+
+# chargement des fonctions
+source("./fonctions.R")
+
+# chargement des packages 
+listePackages <-
+  c("DBI",
+    "dbplyr",
+    "odbc",
+    "RPostgreSQL",
+    "tidyverse",
+    "stringi",
+    "dbplot",
+    "devtools",
+    "compare",
+    "data.table",
+    "R.utils", 
+    "parsedate",
+    "pryr",
+    "lubridate",
+    "sf",
+    "RQGIS",
+    "testthat",
+    "rmarkdown",
+    "shiny",
+    "getPass",
+    "gtools")
+packagesAInstaller <-
+  listePackages[!(listePackages %in% installed.packages()[, "Package"])]
+if (length(packagesAInstaller) > 0)
+  install.packages(packagesAInstaller)
+
+require("DBI")
+require("dbplyr")
+require("odbc")
+require("RPostgreSQL")
+require("tidyverse")
+require("dbplot")
+require("devtools")
+require("compare")
+require("data.table")
+require("R.utils")
+require("parsedate")
+require("pryr")
+require("lubridate")
+require("sf")
+require("RQGIS")
+require("testthat")
+require("rmarkdown")
+require("shiny")
+require("getPass")
+require("stringi")
+require("gtools")
+
+```
+
+## Instanciation des variables
+
+Dans cette section, l'utilisateur doit entrer l'information appropriée pour chacunes des variables propres à son environnement.
+
+1. "pw": Mot de passe de postgres
+2. "emplacementTBS": Chemin d'accès du répertoire du tablespace
+
+```{r}
+emplacementTBS <- "D:/tbsDRF"
+```
+
+## Téléchargement des données
+
+Cette section fait le téléchargement des données du vascan (sous forme de Darwin core archive) et crée les répertoires de travail.
+
+```{r Téléchargement des données, message=TRUE}
+# téléchargement de la base de donnees
+# creation des repertoires
+dir.create("./telechargement")
+dir.create("./vascan_data")
+
+# Lien pour téléchargement de l'archive vascan
+urlvascan <- "https://data.canadensys.net/ipt/archive.do?r=vascan&v=37.6"
+
+# Répertoire de téléchargement
+reptele <- "./telechargement/vascan.zip"
+
+# Répertoire cible pour les fichiers téléchargés
+repvascan <- "./vascan_data"
+
+# trycatch pour le dossier d'installation de la base de données
+succesTele <- FALSE
+compteur <- 0
+while (succesTele == FALSE) {
+  tryCatch(
+    {
+      download.file(urlvascan, reptele, mode = "wb")
+      succesTele <- TRUE
+    },
+    error = function(err_message) {
+      succesTele <- FALSE
+      message(sprintf("Erreur lors du telechargement: %s", urlvascan))
+      message(err_message)
+      message("Le programme va reessayer le telechargement")
+    },
+    finally = {
+      compteur <- compteur + 1
+      if (compteur > 5) {
+        stop("Le telechargement est impossible, erreur de connexion")
+      }
+    }
+  )
+}
+if (succesTele) {
+  unzip(reptele, exdir = repvascan)
+}
+
+```
+
+## Traitement des fichiers
+
+Cette section fait le traitement de certains fichiers de données pour ajuster les formats de date.
+
+```{r Traitement des fichiers, message=FALSE, warning=FALSE}
+
+taxon <- read_delim("./vascan_data/taxon.txt", "\t")
+# vernacularname <- read_delim("./vascan_data/vernacularname.txt", "\t")
+# distribution <- read_delim("./vascan_data/distribution.txt", "\t")
+# resourcerelationship <- read_delim("./vascan_data/resourcerelationship.txt", "\t")
+# description <- read_delim("./vascan_data/description.txt", "\t")
+
+# determination de la taille maximale des champs
+taille <- list()
+max_taille <- list()
+fichier <- taxon
+for (j in 1:ncol(fichier)) {
+  for (i in 1:length(fichier$id)) {
+    taille[i] <-nchar(fichier[, j][[1]][i]) 
+  }
+  if(is.character(taille)){
+    taille <- parse_integer(taille)
+  }
+  max_taille[j] <- max(data.frame(taille), na.rm = T)
+}
+
+# modif du format de date pour taxon
+taxon$modified <- as.POSIXct(taxon$modified, format = "%Y-%m-%dT%H:%M", tz = "America/New_York")
+write_delim(taxon, "./vascan_data/taxon.txt", delim = "\t", na = "")
+
+```
+
+## Creation du tablespace et de la base de donnees
+
+Cette section crée la portion générale de l'architecture soit la base de données et le tablespace associé. Il est important de ne l'executer que si la base de données "db_DRF" n'existe pas sur le poste.
+
+```{r Creation du tablespace et de la base de donnees, message=FALSE, warning=FALSE}
+# Creation du tablespace, de la base de donnees et du shema
+
+drv <- dbDriver("PostgreSQL")
+
+# connexion a postgres
+connect <-
+  dbConnect(
+    drv,
+    dbname = "postgres",
+    host = "localhost",
+    port = 5432,
+    user = "postgres",
+    password = getPass("Password: ")
+  )
+
+# tablespace
+
+if(dir.exists(emplacementTBS)==F){
+  dir.create(emplacementTBS)
+}
+
+if(toString(dbGetQuery(connect, "SELECT spcname FROM pg_tablespace WHERE spcname = 'tbsDRF';")) != "tbsDRF"){
+  test_that("Creation du tablespace", {
+    expect_equal(dbGetQuery(connect, sprintf("CREATE TABLESPACE \"tbsDRF\" OWNER postgres LOCATION '%s';", gsub("/","\\\\", emplacementTBS))), data.frame())
+    expect_equal(dbGetQuery(connect, "ALTER TABLESPACE \"tbsDRF\" OWNER TO postgres;"), data.frame())
+    expect_equal(dbGetQuery(connect, "COMMENT ON TABLESPACE \"tbsDRF\" IS 'Tablespace des donnees de la DRF';"), data.frame())
+  })
+}
+
+# base de donnees
+
+if(toString(dbGetQuery(connect, "SELECT datname FROM pg_database WHERE datname = 'db_DRF';")) != "db_DRF"){
+  test_that("Creation de la base de données", {
+    expect_equal(dbGetQuery(connect, 
+    "CREATE DATABASE \"db_DRF\" WITH OWNER = postgres TABLESPACE \"tbsDRF\" ENCODING = 'UTF8' CONNECTION LIMIT = -1;"), data.frame())
+    expect_equal(dbGetQuery(connect, "COMMENT ON DATABASE \"db_DRF\" IS 'Base de donnees de la DRF';"), data.frame())
+  })
+}
+
+```
+
+## Creation du schema et des tables
+
+Cette section crée le schéma "vascan" et les tables qu'il contient pour qu'elles puissent recevoir les données du vascan.
+
+```{r Creation du schema et des tables, message=FALSE, warning=FALSE}
+
+drv <- dbDriver("PostgreSQL")
+
+# connexion a postgres
+connect <-
+  dbConnect(
+    drv,
+    dbname = "db_DRF",
+    host = "localhost",
+    port = 5432,
+    user = "postgres",
+    password = getPass("Password: ")
+  )
+
+# creation du schema
+test_that("supression schema", {
+  expect_equal(dbGetQuery(connect, "DROP SCHEMA IF EXISTS vascan CASCADE;"), data.frame())
+})
+
+test_that("creation schema", {
+  expect_equal(dbGetQuery(connect, "CREATE SCHEMA vascan AUTHORIZATION postgres;"), data.frame())
+})
+
+test_that("options schema", {
+  expect_equal(dbGetQuery(connect, "COMMENT ON SCHEMA vascan IS 'dB du VASCAN liste des essences vasculaires';"), data.frame())
+  expect_equal(dbGetQuery(connect, "SET search_path TO pg_catalog,public,vascan;"), data.frame())
+})
+
+# creation des tables: table taxon (core)
+
+test_that("creation table taxon", {
+  expect_equal(dbGetQuery(connect, "DROP TABLE IF EXISTS vascan.taxon CASCADE;"), data.frame())
+  expect_equal(dbGetQuery(connect, "CREATE TABLE vascan.taxon(
+	id varchar(100),
+	taxonID varchar(100),
+	acceptedNameUsageID varchar(200), 
+	parentNameUsageID varchar(200), 
+	nameAccordingToID varchar(200),
+	scientificName varchar(200),
+	acceptedNameUsage varchar(200),
+	parentNameUsage varchar(200),
+	nameAccordingTo text,
+	higherClassification text,
+  class varchar(150),
+	plantOrder varchar(150),
+	family varchar(150),
+	genus varchar(150),
+	subgenus varchar(150),
+	specificEpiteth varchar(200),
+	infraspecificEpithet varchar(200),
+	taxonRank varchar(50),
+	scientificNameAuthorship varchar(200),
+	taxonomicStatus varchar(50),
+	modified varchar(50),
+	license varchar(200),
+	bibliographicCitation text,
+	plantReferences varchar(50)
+);"), data.frame())
+  expect_equal(dbGetQuery(connect, "ALTER TABLE vascan.taxon OWNER TO postgres;"), data.frame())
+})
+
+dbGetQuery(connect, "COMMENT ON COLUMN vascan.taxon.id IS 'A unique identifier for the taxon record';")
+dbGetQuery(connect, "COMMENT ON COLUMN vascan.taxon.taxonID IS 'An identifier for the set of taxon information (data associated with the Taxon class). May be a global unique identifier or an identifier specific to the data set';")
+dbGetQuery(connect, "COMMENT ON COLUMN vascan.taxon.acceptedNameUsageID IS 'An identifier for the name usage (documented meaning of the name according to a source) of the currently valid (zoological) or accepted (botanical) taxon';")
+dbGetQuery(connect, "")
+dbGetQuery(connect, "COMMENT ON COLUMN vascan.taxon.parentNameUsageID 
+    IS 'An identifier for the name usage (documented meaning of the name according to a source) of the direct, most proximate higher-rank parent taxon (in a classification) of the most specific element of the scientificName';")
+dbGetQuery(connect, "COMMENT ON COLUMN vascan.taxon.nameAccordingToID 
+    IS 'An identifier for the source in which the specific taxon concept circumscription is defined or implied. See nameAccordingTo';")
+dbGetQuery(connect, "COMMENT ON COLUMN vascan.taxon.scientificName 
+    IS 'The full scientific name, with authorship and date information if known. When forming part of an Identification, this should be the name in lowest level taxonomic rank that can be determined. This term should not contain identification qualifications, which should instead be supplied in the IdentificationQualifier term';")
+dbGetQuery(connect, "COMMENT ON COLUMN vascan.taxon.acceptedNameUsage 
+    IS 'The full name, with authorship and date information if known, of the currently valid (zoological) or accepted (botanical) taxon';")
+dbGetQuery(connect, "COMMENT ON COLUMN vascan.taxon.parentNameUsage 
+    IS 'The full name, with authorship and date information if known, of the direct, most proximate higher-rank parent taxon (in a classification) of the most specific element of the scientificName';")
+dbGetQuery(connect, "COMMENT ON COLUMN vascan.taxon.higherClassification 
+    IS 'A list (concatenated and separated) of taxa names terminating at the rank immediately superior to the taxon referenced in the taxon record';")
+dbGetQuery(connect, "COMMENT ON COLUMN vascan.taxon.plantOrder 
+    IS 'The full scientific name of the order in which the taxon is classified';")
+dbGetQuery(connect, "COMMENT ON COLUMN vascan.taxon.family 
+    IS 'The full scientific name of the family in which the taxon is classified';")
+dbGetQuery(connect, "COMMENT ON COLUMN vascan.taxon.genus 
+    IS 'The full scientific name of the genus in which the taxon is classified';")
+dbGetQuery(connect, "COMMENT ON COLUMN vascan.taxon.subgenus 
+    IS 'The full scientific name of the subgenus in which the taxon is classified';")
+dbGetQuery(connect, "COMMENT ON COLUMN vascan.taxon.specificEpiteth
+    IS 'The name of the first or species epithet of the scientificName';")
+dbGetQuery(connect, "COMMENT ON COLUMN vascan.taxon.infraspecificEpithet
+    IS 'The name of the lowest or terminal infraspecific epithet of the scientificName, excluding any rank designation';")
+dbGetQuery(connect, "COMMENT ON COLUMN vascan.taxon.taxonRank
+    IS 'The taxonomic rank of the most specific name in the scientificName';")
+dbGetQuery(connect, "COMMENT ON COLUMN vascan.taxon.scientificNameAuthorship
+    IS 'The authorship information for the scientificName formatted according to the conventions of the applicable nomenclaturalCode';")
+dbGetQuery(connect, "COMMENT ON COLUMN vascan.taxon.taxonomicStatus
+    IS 'The status of the use of the scientificName as a label for a taxon. Requires taxonomic opinion to define the scope of a taxon. Rules of priority then are used to define the taxonomic status of the nomenclature contained in that scope, combined with the experts opinion. It must be linked to a specific taxonomic reference that defines the concept';")
+dbGetQuery(connect, "COMMENT ON COLUMN vascan.taxon.modified
+    IS 'The most recent date-time on which the resource was changed';")
+dbGetQuery(connect, "COMMENT ON COLUMN vascan.taxon.license
+    IS 'A legal document giving official permission to do something with the resource';")
+dbGetQuery(connect, "COMMENT ON COLUMN vascan.taxon.bibliographicCitation
+    IS 'A bibliographic reference for the resource as a statement indicating how this record should be cited (attributed) when used.';")
+dbGetQuery(connect, "COMMENT ON COLUMN vascan.taxon.plantReferences
+    IS 'A related resource that is referenced, cited, or otherwise pointed to by the described resource';")
+
+# creation de la table vernacularname (extension)
+
+test_that("creation table vernacularname", {
+  expect_equal(dbGetQuery(connect, "DROP TABLE IF EXISTS vascan.vernacularname CASCADE;"), data.frame())
+  expect_equal(dbGetQuery(connect, "CREATE TABLE vascan.vernacularname(
+	coreid varchar(100),
+	vernacularName varchar(100),
+	source text,
+	language char(20),
+	isPreferredName varchar(20)
+);"), data.frame())
+  expect_equal(dbGetQuery(connect, "ALTER TABLE vascan.vernacularname OWNER TO postgres;"), data.frame())
+  expect_equal(dbGetQuery(connect, "COMMENT ON TABLE vascan.vernacularname IS 'Table of common or vernacular names';"), data.frame())
+})
+
+# creation de la table distibution (extension)
+
+test_that("creation table distibution", {
+  expect_equal(dbGetQuery(connect, "DROP TABLE IF EXISTS vascan.distribution CASCADE;"), data.frame())
+  expect_equal(dbGetQuery(connect, "CREATE TABLE vascan.distribution(
+coreid varchar(100),
+locationID char(150),
+locality varchar(50),
+countryCode varchar(50),
+occurrenceStatus varchar(50),
+establishmentMeans varchar(50),
+source text,
+occurrenceRemarks varchar(50)
+);"), data.frame())
+  expect_equal(dbGetQuery(connect, "ALTER TABLE vascan.distribution OWNER TO postgres;"), data.frame())
+  expect_equal(dbGetQuery(connect, "COMMENT ON TABLE vascan.distribution IS 'Table of the distribution of vascular plants';"), data.frame())
+})
+
+# creation de la table recourcerelationship
+
+test_that("creation table recourcerelationship", {
+  expect_equal(dbGetQuery(connect, "DROP TABLE IF EXISTS vascan.resourcerelationship CASCADE;"), data.frame())
+  expect_equal(dbGetQuery(connect, "CREATE TABLE vascan.resourcerelationship(
+	coreid varchar(100),
+  relatedresourceid varchar(100),
+	relationshipofresource varchar(50)
+);"), data.frame())
+  expect_equal(dbGetQuery(connect, "ALTER TABLE vascan.resourcerelationship OWNER TO postgres;"), data.frame())
+  expect_equal(dbGetQuery(connect, "COMMENT ON TABLE vascan.resourcerelationship IS 'Table of the relationships between vascular plants';"), data.frame())
+})
+
+# creation de la table description
+
+test_that("creation table description", {
+  expect_equal(dbGetQuery(connect, "DROP TABLE IF EXISTS vascan.description CASCADE;"), data.frame())
+  expect_equal(dbGetQuery(connect, "CREATE TABLE vascan.description(
+	coreid varchar(100),
+	description varchar(50),
+	type varchar(50)
+);"), data.frame())
+  expect_equal(dbGetQuery(connect, "ALTER TABLE vascan.description OWNER TO postgres;"), data.frame())
+  expect_equal(dbGetQuery(connect, "COMMENT ON TABLE vascan.description IS 'Table of the description of vascular plants';"), data.frame())
+})
+
+```
+
+## Chargement des donnees dans les tables
+
+Cette section réalise le chargement des données dans les tables à partir des fichiers de texte.
+
+```{r Chargement des donnees dans les tables, message=FALSE, warning=FALSE}
+test_that("copie table taxon", {
+  expect_equal(dbGetQuery(connect, paste0("COPY vascan.taxon FROM '", getwd(), "/vascan_data/taxon.txt' DELIMITER '\t' CSV HEADER;")), data.frame())
+})
+
+test_that("copie table vernacularname", {
+  expect_equal(dbGetQuery(connect, paste0("COPY vascan.vernacularname FROM '", getwd(), "/vascan_data/vernacularname.txt' DELIMITER '\t' CSV HEADER;")), data.frame())
+})
+
+test_that("copie table distribution", {
+  expect_equal(dbGetQuery(connect, paste0("COPY vascan.distribution FROM '", getwd(), "/vascan_data/distribution.txt' DELIMITER '\t' CSV HEADER;")), data.frame())
+})
+
+test_that("copie table resourcerelationship", {
+  expect_equal(dbGetQuery(connect, paste0("COPY vascan.resourcerelationship FROM '", getwd(), "/vascan_data/resourcerelationship.txt' DELIMITER '\t' CSV HEADER;")), data.frame())
+})
+  
+test_that("copie table description", {
+  expect_equal(dbGetQuery(connect, paste0("COPY vascan.description FROM '", getwd(), "/vascan_data/description.txt' DELIMITER '\t' CSV HEADER;")), data.frame())
+})
+
+```

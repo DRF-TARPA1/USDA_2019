@@ -1,0 +1,130 @@
+cc_bio,code_3,code_2,nom_scient,nom_fr,vc_code,vc_nom_fr,vc_nom_en,vc_genus,vc_species,vc_scientificname,vc_class,vc_order,vc_family,usda_symbol,usda_code,usda_scientific_name
+Abbal,SAB,SB,Abies balsamea,Sapin baumier,7159,sapin baumier,balsam fir,Abies,balsamea,Abies balsamea (Linnaeus) Miller,Equisetopsida,Pinales,Pinaceae,ABBA,12,Abies balsamea
+Acneg,ERG,,Acer negundo,Érable à Giguère,9206,Ã©rable Ã  GiguÃ¨re,Manitoba maple,Acer,negundo,Acer negundo Linnaeus,Equisetopsida,Sapindales,Sapindaceae,ACNE2,313,Acer negundo
+Acnig,ERN,EI,Acer nigrum,Érable noir,9207,Ã©rable noir,black maple,Acer,nigrum,Acer nigrum F. Michaux,Equisetopsida,Sapindales,Sapindaceae,ACNI5,314,Acer nigrum
+Acpen,ERP,,Acer pensylvarnicum,Érable de Pennsylvanie,9209,Ã©rable de Pennsylvanie,striped maple,Acer,pensylvanicum,Acer pensylvanicum Linnaeus,Equisetopsida,Sapindales,Sapindaceae,ACPE,315,Acer pensylvanicum
+Acpla,ERB,EE,Acer platanoides,Érable de Norvège,9210,Ã©rable de NorvÃ¨ge,Norway maple,Acer,platanoides,Acer platanoides Linnaeus,Equisetopsida,Sapindales,Sapindaceae,ACPL,320,Acer platanoides
+Acrub,ERR,EO,Acer rubrum,Érable rouge,9212,Ã©rable rouge,red maple,Acer,rubrum,Acer rubrum Linnaeus,Equisetopsida,Sapindales,Sapindaceae,ACRU,316,Acer rubrum
+Acsac,ERS,ES,Acer saccharum,Érable à sucre,9214,Ã©rable Ã  sucre,sugar maple,Acer,saccharum,Acer saccharum Marshall,Equisetopsida,Sapindales,Sapindaceae,ACSA3,318,Acer saccharum
+Acsaci,ERA,EA,Acer saccharinum,Érable argenté,9213,Ã©rable argentÃ©,silver maple,Acer,saccharinum,Acer saccharinum Linnaeus,Equisetopsida,Sapindales,Sapindaceae,ACSA2,317,Acer saccharinum
+Acspi,ERE,,Acer spicatum,Érable à épis,,,,,,,,,,,,
+Alcri,AUC,,Alnus crispa var. mollis,Aulne crispé,,,,,,,,,,,,
+Alrug,AUR,,Alnus rugosa var. americana,Aulne rugueux,,,,,,,,,,,,
+Armel,ARM,,Aronia melanocarpya,Aronia noir,,,,,,,,,,,,
+Beall,BOJ,BJ,Betula alleghaniensis,Bouleau jaune,3685,bouleau jaune,yellow birch,Betula,alleghaniensis,Betula alleghaniensis Britton,Equisetopsida,Fagales,Betulaceae,BEAL2,371,Betula alleghaniensis
+Begla,BEG,,Betula glandulosa,Bouleau glanduleux,,,,,,,,,,,,
+Bepap,BOP,BP,Betula papyrifera,Bouleau à papier (blanc),3697,bouleau Ã  papier,paper birch,Betula,papyrifera,Betula papyrifera Marshall,Equisetopsida,Fagales,Betulaceae,BEPA,375,Betula papyrifera
+Bepop,BOG,,Betula populifolia,Bouleau gris (à feuilles de peuplier),3699,bouleau gris,grey birch,Betula,populifolia,Betula populifolia Marshall,Equisetopsida,Fagales,Betulaceae,BEPO,379,Betula populifolia
+Bepum,BEP,,Betula pumila,Bouleau nain,,,,,,,,,,,,
+Cacar,CAR,,Carpinus caroliniana,Charme de Caroline,3720,charme de Caroline,blue-beech,Carpinus,caroliniana,Carpinus caroliniana Walter,Equisetopsida,Fagales,Betulaceae,CACA18,391,Carpinus caroliniana
+Cacor,CAC,CC,Carya cordiformis,Caryer cordiforme,6235,caryer cordiforme,bitternut hickory,Carya,cordiformis,Carya cordiformis (Wangenheim) K. Koch,Equisetopsida,Fagales,Juglandaceae,CACO15,402,Carya cordiformis
+Caova,CAF,CF,Carya ovata,Caryer ovale,6239,caryer ovale,shagbark hickory,Carya,ovata,Carya ovata (Miller) K. Koch,Equisetopsida,Fagales,Juglandaceae,CAOV2,407,Carya ovata
+Ceocc,CEO,,Celtis occidentalis,Micocoulier occidental,4192,micocoulier occidental,common hackberry,Celtis,occidentalis,Celtis occidentalis Linnaeus,Equisetopsida,Rosales,Cannabaceae,CEOC,462,Celtis occidentalis
+Coalt,COA,,Cornus alternifolia,Cornouiller à feuilles alternes,,,,,,,,,,,,
+Cocor,COC,,Corylus cornuta,Noisetier à long bec,,,,,,,,,,,,
+Coper,COP,,Comptonia peregrina,Comptonie voyageuse,,,,,,,,,,,,
+Costo,COR,,Cornus stolonifera,Cornouiller stolonifère,,,,,,,,,,,,
+Dilon,DIE,,Diervilla lonicera,Dièreville chèvrefeuille,,,,,,,,,,,,
+Dipal,DIR,,Dirca palustris,Dirca des marais,,,,,,,,,,,,
+Fagra,HEG,HG,Fagus grandifolia,Hêtre à grandes feuilles,5957,hÃªtre Ã  grandes feuilles,American beech,Fagus,grandifolia,Fagus grandifolia Ehrhart,Equisetopsida,Fagales,Fagaceae,FAGR,531,Fagus grandifolia
+Frame,FRA,FA,Fraxinus americana,Frêne d'Amérique,6726,frÃªne blanc,white ash,Fraxinus,americana,Fraxinus americana Linnaeus,Equisetopsida,Lamiales,Oleaceae,FRAM2,541,Fraxinus americana
+Frnig,FRN,FO,Fraxinus nigra,Frêne noir,6729,frÃªne noir,black ash,Fraxinus,nigra,Fraxinus nigra Marshall,Equisetopsida,Lamiales,Oleaceae,FRNI,543,Fraxinus nigra
+Frpen,FRP,FP,Fraxinus pensylvanica,Frêne de Pennsylvanie,6730,frÃªne rouge,red ash,Fraxinus,pennsylvanica,Fraxinus pennsylvanica Marshall,Equisetopsida,Lamiales,Oleaceae,FRPE,544,Fraxinus pennsylvanica
+Ilver,ILV,,Ilex verticillata,Houx verticillé,,,,,,,,,,,,
+Jucin,NOC,NC,Juglans cinerea,Noyer cendré,6242,noyer cendrÃ©,butternut,Juglans,cinerea,Juglans cinerea Linnaeus,Equisetopsida,Fagales,Juglandaceae,JUCI,601,Juglans cinerea
+Jucom,JUC,,Juniperus communis,Genévrier commun,,,,,,,,,,,,
+Juhor,JUH,,Juniperus horizontalis,Genévrier horizontal,,,,,,,,,,,,
+Juvir,JUV,,Juniperus virginiana,Genévrier de Virginie,,,,,,,,,,,,
+Ladec,MEU,ME,Larix decidua,Mélèze européen,7164,mÃ©lÃ¨ze d'Europe,European larch,Larix,decidua,Larix decidua Miller,Equisetopsida,Pinales,Pinaceae,LADE2,6212,Larix decidua
+Lalar,MEL,ML,Larix laricina,Mélèze laricin,7166,mÃ©lÃ¨ze laricin,tamarack,Larix,laricina,Larix laricina (Du Roi) K. Koch,Equisetopsida,Pinales,Pinaceae,LALA,71,Larix laricina
+Lalep,MEJ,MJ,Larix leptolepis,Mélèze japonais,,,,,,,,,,,,
+Locan,LON,,Lonicera canadensis,Chèvrefeuille du Canada,,,,,,,,,,,,
+Lohir,LOH,,Lonicera hirsuta,Chèvrefeuille hirsute,,,,,,,,,,,,
+Lovil,LOV,,Lonicera villosa,Chèvrefeuille velu,,,,,,,,,,,,
+Mygal,MYG,,Myrica gale,Myrique baumier,,,,,,,,,,,,
+Nemuc,NEM,,Nemopanthus mucronatus,Némopanthe mucroné,,,,,,,,,,,,
+Osvir,OSV,OV,Ostrya virginiana,Ostryer de Virginie,3727,ostryer de Virginie,eastern hop-hornbeam,Ostrya,virginiana,Ostrya virginiana (Miller) K. Koch,Equisetopsida,Fagales,Betulaceae,OSVI,701,Ostrya virginiana
+Paqui,PAQ,,Parthenocissus quinquefolia,Parthénocisse à cinq folioles,,,,,,,,,,,,
+Piabi,EPO,EV,Picea abies,Épinette de Norvège,7169,Ã©pinette de NorvÃ¨ge,Norway spruce,Picea,abies,Picea abies (Linnaeus) H. Karsten,Equisetopsida,Pinales,Pinaceae,PIAB,91,Picea abies
+Piban,PIG,PG,Pinus banksiana,Pin gris,7181,pin gris,jack pine,Pinus,banksiana,Pinus banksiana Lambert,Equisetopsida,Pinales,Pinaceae,PIBA2,105,Pinus banksiana
+Piglau,EPB,EB,Picea glauca,Épinette blanche,7173,Ã©pinette blanche,white spruce,Picea,glauca,Picea glauca (Moench) Voss,Equisetopsida,Pinales,Pinaceae,PIGL,94,Picea glauca
+Pimar,EPN,EN,Picea mariana,Épinette noire,7174,Ã©pinette noire,black spruce,Picea,mariana,"Picea mariana (Miller) Britton, Sterns & Poggenburgh",Equisetopsida,Pinales,Pinaceae,PIMA,95,Picea mariana
+Pires,PIR,PR,Pinus resinosa,Pin rouge,7193,pin rouge,red pine,Pinus,resinosa,Pinus resinosa Aiton,Equisetopsida,Pinales,Pinaceae,PIRE,125,Pinus resinosa
+Pirig,PID,PC,Pinus rigida,Pin rigide,7194,pin rigide,pitch pine,Pinus,rigida,Pinus rigida P. Miller,Equisetopsida,Pinales,Pinaceae,PIRI,126,Pinus rigida
+Pirub,EPR,EU,Picea rubens,Épinette rouge,7177,Ã©pinette rouge,red spruce,Picea,rubens,Picea rubens Sargent,Equisetopsida,Pinales,Pinaceae,PIRU,97,Picea rubens
+Pistr,PIB,PB,Pinus strobus,Pin blanc,7195,pin blanc,eastern white pine,Pinus,strobus,Pinus strobus Linnaeus,Equisetopsida,Pinales,Pinaceae,PIST,129,Pinus strobus
+Pisyl,PIS,PS,Pinus sylvestris,Pin sylvestre,7196,pin sylvestre,Scots pine,Pinus,sylvestris,Pinus sylvestris Linnaeus,Equisetopsida,Pinales,Pinaceae,PISY,130,Pinus sylvestris
+Pobal,PEB,PA,Populus balsamifera,Peuplier baumier,9044,peuplier baumier,balsam poplar,Populus,balsamifera,Populus balsamifera Linnaeus,Equisetopsida,Malpighiales,Salicaceae,POBA2,741,Populus balsamifera
+Podel,PED,PL,Populus deltoides,Peuplier deltoïde,9047,peuplier deltoÃ¯de,eastern cottonwood,Populus,deltoides,Populus deltoides W. Bartram ex Marshall,Equisetopsida,Malpighiales,Salicaceae,PODE3,742,Populus deltoides
+Pogra,PEG,PD,Populus grandidentata,Peuplier à grandes dents,9049,peuplier Ã  grandes dents,large-toothed aspen,Populus,grandidentata,Populus grandidentata Michaux,Equisetopsida,Malpighiales,Salicaceae,POGR4,743,Populus grandidentata
+Potre,PET,PT,Populus tremuloides,Peuplier faux tremble,9053,peuplier faux-tremble,trembling aspen,Populus,tremuloides,Populus tremuloides Michaux,Equisetopsida,Malpighiales,Salicaceae,POTR5,746,Populus tremuloides
+Prpen,PRP,,Prunus pensylvanica,Cerisier de Pennsylvanie,8871,cerisier de Pennsylvanie,pin cherry,Prunus,pensylvanica,Prunus pensylvanica Linnaeus f.,Equisetopsida,Rosales,Rosaceae,PRPE2,761,Prunus pensylvanica
+Prser,CET,CT,Prunus serotina,Cerisier tardif,8876,cerisier tardif,black cherry,Prunus,serotina,Prunus serotina Ehrhart,Equisetopsida,Rosales,Rosaceae,PRSE2,762,Prunus serotina
+Prvir,PRV,,Prunus virginiana,Cerisier de Virginie,8881,cerisier de Virginie,chokecherry,Prunus,virginiana,Prunus virginiana Linnaeus,Equisetopsida,Rosales,Rosaceae,PRVI,763,Prunus virginiana
+Qualb,CHB,CB,Quercus alba,Chêne blanc,5959,chÃªne blanc,white oak,Quercus,alba,Quercus alba Linnaeus,Equisetopsida,Fagales,Fagaceae,QUAL,802,Quercus alba
+Qubic,CHE,CI,Quercus bicolor,Chêne bicolore,5960,chÃªne bicolore,swamp white oak,Quercus,bicolor,Quercus bicolor Willdenow,Equisetopsida,Fagales,Fagaceae,QUBI,804,Quercus bicolor
+Qumac,CHG,CG,Quercus macrocarpa,Chêne à gros fruits,5965,chÃªne Ã  gros fruits,bur oak,Quercus,macrocarpa,Quercus macrocarpa Michaux,Equisetopsida,Fagales,Fagaceae,QUMA2,823,Quercus macrocarpa
+Qurub,CHR,CR,Quercus rubra var.,Chêne rouge,5970,chÃªne rouge,northern red oak,Quercus,rubra,Quercus rubra Linnaeus,Equisetopsida,Fagales,Fagaceae,QURU,833,Quercus rubra
+Rhaln,RHA,,Rhamnus alnifolia,Nerprun à feuilles d'aulne,,,,,,,,,,,,
+Rhcat,RHM,,Rhamnus cathartica,Nerprun cathartique,8597,nerprun cathartique,European buckthorn,Rhamnus,cathartica,Rhamnus cathartica Linnaeus,Equisetopsida,Rosales,Rhamnaceae,RHCA3,6918,Rhamnus cathartica
+Rhrad,RHR,,Rhus radicans,Sumac grimpant,,,,,,,,,,,,
+Rhtyp,RHT,,Rhus typhina,Sumac vinaigrier,,,,,,,,,,,,
+Riame,RIA,,Ribes americanum,Gadellier américain,,,,,,,,,,,,
+Ricyn,RIC,,Ribes cynosbati,Groseillier des chiens,,,,,,,,,,,,
+Rigla,RIG,,Ribes glandulosum,Gadellier glanduleux,,,,,,,,,,,,
+Rihir,RIH,,Ribes hirtellum,Groseillier hérissé,,,,,,,,,,,,
+Rilac,RIL,,Ribes lacustre,Gadellier lacustre,,,,,,,,,,,,
+Ritri,RIT,,Ribes triste,Gadellier amer,,,,,,,,,,,,
+Roaci,ROA,,Rosa acicularis,Rosier aciculaire,,,,,,,,,,,,
+Ruall,RUA,,Rubus alleghaniensis,Ronce des Alléghanys,,,,,,,,,,,,
+Ruida,RUI,,Rubus idaeus,Framboisier rouge,,,,,,,,,,,,
+Ruocc,RUO,,Rubus occidentalis,Framboisier noir,,,,,,,,,,,,
+Ruodo,RUD,,Rubus odoratus,Ronce odorante,,,,,,,,,,,,
+Sacan,SAC,,Sambucus canadensis,Sureau blanc,,,,,,,,,,,,
+Sapub,SAP,,Sambucus pubens,Sureau pubescent,,,,,,,,,,,,
+Shcan,SHP,,Shepherdia canadensis,Shépherdie du Canada,,,,,,,,,,,,
+Soame,SOA,,Sorbus americana,Sorbier d'Amérique,8963,sorbier d'AmÃ©rique,American mountain-ash,Sorbus,americana,Sorbus americana Marshall,Equisetopsida,Rosales,Rosaceae,SOAM3,935,Sorbus americana
+Sodec,SOD,,Sorbus decora,Sorbier plaisant,8965,sorbier plaisant,showy mountain-ash,Sorbus,decora,Sorbus decora (Sargent) C.K. Schneider,Equisetopsida,Rosales,Rosaceae,SODE3,937,Sorbus decora
+Splat,SPL,,Spiraea latifolia,Spirée à larges feuilles,,,,,,,,,,,,
+Sptom,SPT,,Spiraea tomentosa,Spirée tomenteuse,,,,,,,,,,,,
+Tacan,TAC,,Taxus canadensis,If du Canada,,,,,,,,,,,,
+Thocc,THO,TO,Thuja occidentalis,Thuya occidental,4711,thuya occidental,eastern white cedar,Thuja,occidentalis,Thuja occidentalis Linnaeus,Equisetopsida,Cupressales,Cupressaceae,THOC2,241,Thuja occidentalis
+Tiame,TIL,TA,Tilia americana,Tilleul d'Amérique,6640,tilleul d'AmÃ©rique,basswood,Tilia,americana,Tilia americana Linnaeus,Equisetopsida,Malvales,Malvaceae,TIAM,951,Tilia americana
+Tscan,PRU,PU,Tsuga canadensis,Pruche de l'Est,7202,pruche du Canada,eastern hemlock,Tsuga,canadensis,Tsuga canadensis (Linnaeus) CarriÃ¨re,Equisetopsida,Pinales,Pinaceae,TSCA,261,Tsuga canadensis
+Ulame,ORA,OA,Ulmus americana,Orme d'Amérique,9424,orme d'AmÃ©rique,white elm,Ulmus,americana,Ulmus americana Linnaeus,Equisetopsida,Rosales,Ulmaceae,ULAM,972,Ulmus americana
+Ulrub,ORR,OO,Ulmus rubra,Orme rouge,9430,orme rouge,slippery elm,Ulmus,rubra,Ulmus rubra Muhlenberg,Equisetopsida,Rosales,Ulmaceae,ULRU,975,Ulmus rubra
+Ultho,ORT,OT,Ulmus thomasii,Orme de Thomas,9431,orme liÃ¨ge,rock elm,Ulmus,thomasii,Ulmus thomasii Sargent,Equisetopsida,Rosales,Ulmaceae,ULTH,977,Ulmus thomasii
+Vialn,VIL,,Viburnum alnifolium,Viorne bois-d'orignal,,,,,,,,,,,,
+Vicas,VIC,,Viburnum cassinoides,Viorne cassinoïdes,,,,,,,,,,,,
+Viedu,VIE,,Viburnum edule,Viorne comestible,,,,,,,,,,,,
+Virip,VIR,,Vitis riparia,Vigne des rivages,,,,,,,,,,,,
+Vitri,VIT,,Viburnum trilobum,Viorne trilobée,,,,,,,,,,,,
+,,MH,,Mélèze hybride,,,,,,,,,,,,
+,,FX,,Feuillus indéterminés,,,,,,,,,,,,
+,AME,,Amelanchier sp.,Amélanchier,,,,,,,,,,,,
+,,FT,,Association de feuillus tolérants,,,,,,,,,,,,
+,,EP,,Combinaison des épinettes,,,,,,,,,,,,
+,,RX,,Résineux indéterminés,,,,,,,,,,,,
+,,PO,,Peuplier européen,,,,,,,,,,,,
+,,RF,,Robinier faux-acacia,,,,,,,,,,,,
+,,FN,,Association de feuillus non commerciaux,,,,,,,,,,,,
+,,FH,,Association de feuillus sur station humide,,,,,,,,,,,,
+,,PI,,Combinaison des pins,,,,,,,,,,,,
+,,SE,,Association de sapin et d'épinette blanche,,,,,,,,,,,,
+,,PF,,Peuplier blanc,,,,,,,,,,,,
+,,FZ,,Feuillus plantés indéterminés,,,,,,,,,,,,
+,SAL,,Salix sp.,Saule,,,,,,,,,,,,
+,,CP,,Chêne pédonculé,,,,,,,,,,,,
+,,FI,,Association de feuillus intolérants,,,,,,,,,,,,
+,,PE,,Combinaison des peupliers,,,,,,,,,,,,
+,,PN,,Peuplier d'Italie,,,,,,,,,,,,
+,,PV,,Platane occidental,,,,,,,,,,,,
+,CRA,,Crataegus sp.,Aubépines,,,,,,,,,,,,
+,,ER,,Combinaison des érables,,,,,,,,,,,,
+,PEH,PH,Populus sp.,Peuplier hybride,,,,,,,,,,,,
+,,RZ,,Résineux plantés indéterminés,,,,,,,,,,,,
+,,OR,,Combinaison des ormes,,,,,,,,,,,,
+,JUN,,Juniperus sp.,Genévriers,,,,,,,,,,,,
+,,CH,,Combinaison des chênes,,,,,,,,,,,,
+,MAS,,Malus sp.,Pommiers,,,,,,,,,,,,
+,,NN,,Noyer noir,,,,,,,,,,,,
