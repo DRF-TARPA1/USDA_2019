@@ -1,0 +1,8 @@
+Modifications apportées aux codes CCBIO lors de l'harmonisationdes espèces:
+
+Aeoct (Aesculus octandra Marshall) 		devient: 	Aefla (Aesculus flava Aiton)
+Catom (Carya tomentosa (Poir.) Nutt.) 	devient:	Caalb (Carya alba (Mill.) K. Koch)
+Qufalf (Quercus falcata Michx.)			devient:	Qufal (Quercus falcata Michx.)
+Qumac (Quercus macdanielii) 			est retiré de la liste.
+Qumar (Quercus macrocarpa Michx.)		devient:	Qumac (Quercus macrocarpa Michx.)
+Tihet (Tilia heterophylla Vent.) 		est retiré de la liste
